@@ -1,0 +1,15 @@
+# Django-related files and directories
+__pycache__
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+*.log
+
+# Configuration and sensitive data files
+.env
+*.ini
+*.conf
+*.key
+*.crt
+env/
