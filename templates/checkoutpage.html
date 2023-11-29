@@ -238,7 +238,14 @@
                         <label for="coupon_code">Coupon Code:</label>
                         <input type="text" id="coupon_code" name="coupon_code" placeholder="Enter your coupon code" >
                         <button type="submit" name="apply_coupon">Apply</button>
+
+                        <div>
+                            {% for message in messages %} <p style="color: red;">{{message}}</p> {% endfor %}
+                        </div>
+
                 </div>
+
+                
     
                 <div class="card-body-right col-md-6">
     
