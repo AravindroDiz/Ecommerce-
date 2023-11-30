@@ -61,7 +61,7 @@ def loginn(request):
         user = authenticate(request,email=username,password=password)
         if user is not None and not user.is_staff:
             if user.is_active:
-                login(request,user)
+                login(request, user)
                 request.session['username'] = username
                 return redirect('home')
                     
