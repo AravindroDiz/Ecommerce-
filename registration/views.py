@@ -128,12 +128,19 @@ def register(request):
         if password != cpassword:
             messages.error(request, "Passwords do not match.")
             return HttpResponseRedirect(request.path_info)
+        
+        if not firstname.isalpha() and not lastname.isalpha():
+            messages.error(request, "Firstname and Lastname should only contain alphanumeric characters.")
+            return HttpResponseRedirect(request.path_info)
+        
+        if phone.isdigit() and len(phone) == 10 and phone.count('0') == 10:
+            messages.error(request, "Phone number cannot be ten zeroes.")
+            return HttpResponseRedirect(request.path_info)
 
         if Customer.objects.filter(email=email).exists():
             messages.warning(request, "Email already exists.")
             return HttpResponseRedirect(request.path_info)
 
-        # Validate password using Django's built-in password validation
         try:
             validate_password(password)
         except ValidationError as e:
@@ -608,9 +615,11 @@ def update_quantity(request, product_id):
         try:
             cart_item = Cart.objects.get(user=user, product=product)
             if change == 1:
-                
-                cart_item.quantity += 1
-                cart_item.save()
+                if cart_item.quantity > product.quantity:
+                    messages(request,"qauntity limit exceeded!")
+                else:
+                    cart_item.quantity += 1
+                    cart_item.save()
             elif change == -1:
                 
                 if cart_item.quantity > 1:

@@ -65,10 +65,17 @@
                 <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
                   <!-- Quantity -->
                   <div class="d-flex mb-4" style="max-width: 300px">
-                    <button class="btn btn-primary px-3 me-2" style="height: 2.5rem;"
+                    {% if item.quantity == 1 %}
+                    <button disabled id="mbtn-{{ item.product.id }}" class="btn btn-primary px-3 me-2" style="height: 2.5rem;"
                       onclick="updateQuantity('{{ item.product.id }}', -1)">
                       <i class="fas fa-minus"></i>
                     </button>
+                    {% else %}
+                    <button id="mbtn-{{ item.product.id }}" class="btn btn-primary px-3 me-2" style="height: 2.5rem;"
+                      onclick="updateQuantity('{{ item.product.id }}', -1)">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                    {% endif %}
 
                     <div class="form-outline">
                       <input id="productQuantity{{ item.product.id }}" min="1" name="quantity"
@@ -77,15 +84,26 @@
                       <label class="form-label" for="form1">Quantity</label>
                     </div>
 
-                    <button class="btn btn-primary px-3 ms-2" style="height: 2.5rem;"
+
+                    
+                  {% if item.quantity > item.product.quantity %}
+                  <p class="text-danger"><small>Quantity exceeds available stock!</small></p>
+                  <!-- Disable the "+" button when the quantity exceeds the stock -->
+                  <button id="btn-{{ item.product.id }}" class="btn btn-primary px-3 ms-2" style="height: 2.5rem;"
+                      onclick="updateQuantity('{{ item.product.id }}', 1)" disabled>
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  {% else %}
+                    <button id="btn-{{ item.product.id }}" class="btn btn-primary px-3 ms-2" style="height: 2.5rem;"
                       onclick="updateQuantity('{{ item.product.id }}', 1)">
                       <i class="fas fa-plus"></i>
                     </button>
+                    {% endif %}
                   </div>
                   <!-- Quantity -->
-
+                  <p style="display: none" id="qty-{{ item.product.id}}"> {{ item.product.quantity }} </p>
                   <!-- Price -->
-
+                  <p class="text-muted"><small>Stock: {{ item.product.quantity }} left!</small></p>
 
                   <!-- Price -->
                 </div>
@@ -100,7 +118,7 @@
 
             </div>
           </div>
-          <a href="{% url 'products'%}" class="float-right btn btn-warning shadow-0" >Back</a>
+          <a href="{% url 'products'%}" class="float-right btn btn-warning shadow-0">Back</a>
 
         </div>
         <div class="col-md-4">
@@ -180,7 +198,21 @@
   <script>
 
     function updateQuantity(productId, change) {
+      const stockLeft = Number(document.getElementById('qty-' + productId).innerText.trim());
       const quantityInput = document.getElementById(`productQuantity${productId}`);
+
+      if (Number(quantityInput.value) + change >= stockLeft) {
+        document.getElementById('btn-' + productId).disabled = true;
+      } else {
+        document.getElementById('btn-' + productId).disabled = false;
+      }
+
+      if ((Number(quantityInput.value) + change) === 1) {
+        document.getElementById('mbtn-' + productId).disabled = true;
+      } else {
+        document.getElementById('mbtn-' + productId).disabled = false;
+      }
+
       let data = new FormData();
       data.append('qty', change.toString());
 
