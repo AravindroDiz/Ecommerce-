@@ -483,7 +483,35 @@ def addaddress(request):
         user = request.user
         users = Customer.objects.get(email=user)
 
-        if request.user.is_authenticated and street_address.strip() != '' and city.strip() != '' and state.strip() != '' and postal_code.strip() != '':
+
+        if (
+            request.user.is_authenticated
+            and street_address.strip() != ''
+            and city.strip() != ''
+            and state.strip() != ''
+            and postal_code.strip() != ''
+        ):
+
+            if not postal_code.isdigit():
+                messages.error(request, "Invalid zip code. Please enter a numeric value.")
+                return render(request, 'addaddress.html')
+
+
+            if any(not char.isalpha() and char not in [' ', '-', ','] for char in street_address + city + state):
+                messages.error(request, "Invalid special characters in address, city, or state.")
+                return render(request, 'addaddress.html')
+
+
+            if len(postal_code) != 6 or len(set(postal_code))== 1:
+
+                messages.error(request, "Invalid zip code. Please enter a proper value.")
+                return render(request, 'addaddress.html')
+            
+            existing_addresses = Address.objects.filter(user=request.user, street_address=street_address)
+            if existing_addresses.exists():
+                messages.error(request, "Address with this street address already exists.")
+                return render(request, 'addaddress.html')
+
             address = Address.objects.create(
                 user=request.user,
                 street_address=street_address,
@@ -492,12 +520,12 @@ def addaddress(request):
                 zip_code=postal_code
             )
             messages.success(request, "Address added successfully.")
-            
             return redirect('userprofile', id=users.id)
         else:
             messages.error(request, "All fields must be filled out.")
             
     return render(request, 'addaddress.html')
+
 
 @login_required(login_url='loginn')
 def addressview(request):
@@ -981,6 +1009,10 @@ def productofferview(request):
 def search_products(request):
     query = request.GET.get('q')
     products = Product.objects.filter(name__icontains=query)
+
+    if not products:
+        messages.warning(request, 'No products found.')
+
     return render(request,'search_results.html',{'product':products})
 
 def refferalcode(request):
